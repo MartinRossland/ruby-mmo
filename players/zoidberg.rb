@@ -12,7 +12,7 @@ module Zoidberg
     random_name = ""
     random_chars = ("m".."z").to_a
     1.upto(rand(5..15)){ |l| random_name += random_chars[rand(0..(random_chars.count-1))] }
-    puts random_name.capitalize
+    return random_name.capitalize
   end
   
   def move
