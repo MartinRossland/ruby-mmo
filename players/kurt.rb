@@ -1,4 +1,4 @@
-module Kurt
+module SneakySnake
 
   def players
     Game.world[:players].select{ |p| p != self }
@@ -14,17 +14,22 @@ module Kurt
   end
 
   def select_victim
-    killable.max{|p| p.stats[:experience]}
+    players.max{|p| p.stats[:experience]}
+    #players.min{|p| p.stats[:health]}
   end
 
   def move
     return [:attack, killable.first] unless killable.empty?
-    return [:attack, players.first] if players.length == 1 || stats[:health] >= 100
+    return [:rest] if stats[:health] < 80
+    return [:attack, select_victim] if 
+      players.length == 1 || 
+      stats[:health] >= 100 || 
+      rand > 0.75
     [:rest]
   end
 
   def to_s
-    "Kurt"
+    "Sneaky Snake"
   end
 
 end
