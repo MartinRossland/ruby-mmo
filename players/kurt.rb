@@ -5,7 +5,7 @@ module SneakySnake
     return [:attack, select_victim] if 
       players.length == 1 || 
       stats[:health] >= @player.max_health || 
-      rand > 0.85
+      rand > 0.9
     [:rest]
   end
 
@@ -19,11 +19,12 @@ module SneakySnake
   def players
     Game.world[:players]
       .select{ |p| p != self && p.to_s != "rat" }
-      #.sort{ |a,b| a.stats[:experience] <=> b.stats[:experience] }
+      #.sort{ |a,b| b.stats[:experience] <=> a.stats[:experience] }
   end
 
   def killable
-    players.select{|p| killable?(p)}
+    dying = players.select{|p| killable?(p)}
+    dying[rand(dying.count - 1)]
   end
  
   def killable?(player)
