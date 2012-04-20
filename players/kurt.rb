@@ -1,7 +1,7 @@
 module SneakySnake
 
   def move
-    return [:attack, killable.first] unless killable.empty?
+    return [:attack, killable] unless killable.nil?
     return [:attack, select_victim] if 
       players.length == 1 || 
       stats[:health] >= @player.max_health || 
