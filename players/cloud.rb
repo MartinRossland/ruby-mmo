@@ -1,19 +1,20 @@
 module Cloud
+  HEALTH_INDEX = [100,110,125,145,170,195,225,260]
+  
   def to_s
     "Z Cloud Strife"
   end
   
   def move
-    too_many_opponents
-    if full_health?
-      kill_or_leader
+    if full_health? && !winning
+        kill_or_leader
     else
       [:rest]
     end
   end
   
   def opponents
-    Game.world[:players].select{|p| p!=self && health(p) > 0 && p.to_s != "rat"}
+    Game.world[:players].select{|p| p!=self && health(p) > 0}
   end
   
   def lowest_hp
@@ -21,7 +22,20 @@ module Cloud
   end
   
   def biggest_threat
-    opponents.max { |a,b| a.stats[:experience] <=> b.stats[:experience] }
+    opponents.max { |a,b| experience(a) <=> experience(b) }
+  end
+  
+  def winning
+    experience(biggest_threat) < experience(self)
+  end
+  
+  def rat
+    rats = Game.world[:players].select{|p| p!=self && p.alive && p.to_s == "rat"}
+    if rats.count < 4 || self.stats[:level] == 1
+      false
+    else
+      rats[2]
+    end
   end
   
   def calculate_damage(strength , defense)
@@ -37,7 +51,7 @@ module Cloud
   end
   
   def full_health?
-    health(self) == 100
+    health(self) == max_health(self)
   end
   
   def one_on_one
@@ -47,19 +61,15 @@ module Cloud
   def kill_or_leader
     if limit_break(self, lowest_hp)
       [:attack, lowest_hp]
+    elsif rat
+      [:attack, rat]
     else
       [:attack, biggest_threat]
     end
   end
   
-  def too_many_opponents
-    if opponents.count < 5
-      unless Game.world[:players].include?(self)
-        Game.world[:players] << self
-      end
-    else
-      Game.world[:players].reject! { |p| p == self }
-    end
+  def max_health(p)
+   HEALTH_INDEX[p.stats[:level]]
   end
   
   def health(p)
@@ -68,6 +78,10 @@ module Cloud
   
   def strength(p)
     p.stats[:strength]
+  end
+  
+  def experience(p)
+    p.stats[:experience]
   end
   
   def defense(p)
